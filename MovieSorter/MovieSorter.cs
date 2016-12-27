@@ -70,7 +70,7 @@ namespace MovieSorter
         private void Query()
         {
             var filters =
-                new Regex("(CAMRip|CAM|TS|TELESYNC|PDVD|PTVD|PPVRip|SCR|SCREENER|DVDSCR|DVDSCREENER|BDSCR|R4|R5|R5LINE|R5.LINE|DVD|DVD5|DVD9|DVDRip|DVDR|TVRip|DSR|PDTV|SDTV|HDTV|HDTVRip|DVB|DVBRip|DTHRip|VODRip|VODR|BDRip|BRRip|BR.Rip|BluRay|Blu.Ray|BD|BDR|BD25|BD50|3D.BluRay|3DBluRay|3DBD|Remux|BDRemux|BR.Scr|BR.Screener|HDDVD|HDRip|WorkPrint|VHS|VCD|TELECINE|WEBRip|WEB.Rip|WEBDL|WEB.DL|WEBCap|WEB.Cap|ithd|iTunesHD|Laserdisc|AmazonHD|NetflixHD|NetflixUHD|VHSRip|LaserRip|URip|UnknownRip|MicroHD|WP|TC|PPV|DDC|R5.AC3.5.1.HQ|DVD-Full|DVDFull|Full-Rip|FullRip|DSRip|SATRip|BD5|BD9|Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|(Ultimate.)?(Director.?s|Theatrical|Ultimate|Final|Rogue|Collectors|Special|Despecialized).(Cut|Edition|Version)|((H|HALF|F|FULL)[^\\p{Alnum}]{0,2})?(SBS|TAB|OU)|DivX|Xvid|AVC|(x|h)[.]?(264|265)|HEVC|3ivx|PGS|MP[E]?G[45]?|MP[34]|(FLAC|AAC|AC3|DD|MA).?[2457][.]?[01]|[26]ch|(Multi.)?DTS(.HD)?(.MA)?|FLAC|AAC|AC3|TrueHD|Atmos|[M0]?(420|480|720|1080|1440|2160)[pi]|(?<=[-.])(420|480|720|1080|2D|3D)|10.?bit|(24|30|60)FPS|Hi10[P]?|[a-z]{2,3}.(2[.]0|5[.]1)|(19|20)[0-9]+(.)S[0-9]+(?!(.)?E[0-9]+)|(?<=\\d+)v[0-4]|CD\\d+|3D|2D)");
+                new Regex(@"(CAMRip|CAM|TS|TELESYNC|PDVD|PTVD|PPVRip|SCR|SCREENER|DVDSCR|DVDSCREENER|BDSCR|R4|R5|R5LINE|R5.LINE|DVD|DVD5|DVD9|DVDRip|DVDR|TVRip|DSR|PDTV|SDTV|HDTV|HDTVRip|DVB|DVBRip|DTHRip|VODRip|VODR|BDRip|BRRip|BR.Rip|BluRay|Blu.Ray|BD|BDR|BD25|BD50|3D.BluRay|3DBluRay|3DBD|Remux|BDRemux|BR.Scr|BR.Screener|HDDVD|HDRip|WorkPrint|VHS|VCD|TELECINE|WEBRip|WEB.Rip|WEBDL|WEB.DL|WEBCap|WEB.Cap|ithd|iTunesHD|Laserdisc|AmazonHD|NetflixHD|NetflixUHD|VHSRip|LaserRip|URip|UnknownRip|MicroHD|WP|TC|PPV|DDC|R5.AC3.5.1.HQ|DVD-Full|DVDFull|Full-Rip|FullRip|DSRip|SATRip|BD5|BD9|Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|(Ultimate.)?(Director.?s|Theatrical|Ultimate|Final|Rogue|Collectors|Special|Despecialized).(Cut|Edition|Version)|((H|HALF|F|FULL)[^\\p{Alnum}]{0,2})?(SBS|TAB|OU)|DivX|Xvid|AVC|(x|h)[.]?(264|265)|HEVC|3ivx|PGS|MP[E]?G[45]?|MP[34]|(FLAC|AAC|AC3|DD|MA).?[2457][.]?[01]|[26]ch|(Multi.)?DTS(.HD)?(.MA)?|FLAC|AAC|AC3|TrueHD|Atmos|[M0]?(420|480|720|1080|1440|2160)[pi]|(?<=[-.])(420|480|720|1080|2D|3D)|10.?bit|(24|30|60)FPS|Hi10[P]?|[a-z]{2,3}.(2[.]0|5[.]1)|(19|20)[0-9]+(.)S[0-9]+(?!(.)?E[0-9]+)|(?<=\\d+)v[0-4]|CD\\d+|3D|2D)");
             var baseURL = "http://www.omdbapi.com/";
             listView1.Items.Clear();
             var match = new List<string>();
@@ -137,10 +137,12 @@ namespace MovieSorter
                                 {
                                     var M_pattern = "[0-9]{4}";
                                     var M = Regex.Match(file, M_pattern);
-                                    var year = int.Parse(M.Value);
+                                    int year;
+                                    if (!M.Success) year = 0;
+                                    else year = int.Parse(M.Value);
                                     if (year >= 1900 && year < 2100)
                                     {
-                                        if (year == 2016) match.Add(file);
+                                        if (year == 2016) match.Add(name);
                                     }
                                     else
                                     {
@@ -151,6 +153,7 @@ namespace MovieSorter
                                             if (TestWord(item, filters)) tmpName += item + ".";
                                             else break;
                                         }
+                                        tmpName = tmpName.Substring(0, tmpName.Length - 1);
                                         var uri = baseURL + "?s=" + tmpName + "&type=movie&r=json";
                                         WebRequest request = WebRequest.Create(uri);
                                         request.Credentials = CredentialCache.DefaultCredentials;
@@ -163,10 +166,17 @@ namespace MovieSorter
                                         var responseFromServer = reader.ReadToEnd();
                                         // Display the content.
                                         dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
+                                        string tmpResult = result.ToString();
+                                        tmpResult = tmpResult.Replace("\\\"", "");
+                                        tmpResult = tmpResult.Replace("\r\n", string.Empty);
+                                        tmpResult = tmpResult.Substring(tmpResult.IndexOf("["),
+                                            tmpResult.IndexOf("]") - 9);
+                                        tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
+                                        result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
                                         foreach (var item in result)
                                         {
-                                            if(item.Title.Equals(tmpName) && item.Type.Equals("movie"))
-                                                if (item.Year.Equals("2016")) match.Add(name);
+                                            if(item.Title.ToString().Equals(tmpName) && item.Type.ToString().Equals("movie"))
+                                                if (item.Year.ToString().Equals("2016")) match.Add(name);
                                         }
 
                                     }
