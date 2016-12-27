@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Net;
+using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+
 
 namespace MovieSorter
 {
@@ -100,25 +101,51 @@ namespace MovieSorter
                                     var S = Regex.Match(file, S_pattern);
                                     var Series = S.Value;
                                     Series = Series.Replace("S", " ");
-                                    MessageBox.Show(Series);
-                                    var uri = baseURL + "?t=" + file + "&Season=" + S + "&r=json";
-                                    var request = WebRequest.Create(uri);
+                                    SP = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
+                                    var Name = SP.Replace(file, string.Empty);
+                                    //MessageBox.Show(Name);
+                                    //MessageBox.Show(Series);
+                                    var uri = baseURL + "?t=" + Name + "&Season=" + Series + "&r=json";
+                                    // Create a request for the URL. 
+                                    WebRequest request = WebRequest.Create(uri);
+                                    // If required by the server, set the credentials.
+                                    request.Credentials = CredentialCache.DefaultCredentials;
+                                    // Get the response.
+                                    WebResponse response = request.GetResponse();
+                                    // Display the status.
+                                    //Console.WriteLine(((HttpWebResponse)response).StatusDescription);
+                                    // Get the stream containing content returned by the server.
+                                    var dataStream = response.GetResponseStream();
+                                    // Open the stream using a StreamReader for easy access.
+                                    var reader = new StreamReader(dataStream);
+                                    // Read the content.
+                                    var responseFromServer = reader.ReadToEnd();
+                                    // Display the content.
+                                    dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
+                                    var Episodes = result.Episodes;
+                                    // Clean up the streams and the response.
+                                    reader.Close();
+                                    response.Close();
 
                                     if (!MatchList.Contains(name) && !MatchList.Contains(name.ToLower()))
                                     {
-                                        match.Add(name);
-                                        progressBar1.Visible = true;
-                                        progressBar1.Minimum = 0;
-                                        progressBar1.Maximum = match.Count;
-                                        progressBar1.Value = 0;
-                                        progressBar1.Step = 1;
+                                        if (TestYear(Episodes))
+                                            {
+                                            match.Add(name);
+                                            progressBar1.Visible = true;
+                                            progressBar1.Minimum = 0;
+                                            progressBar1.Maximum = match.Count;
+                                            progressBar1.Value = 0;
+                                            progressBar1.Step = 1;
+                                        }
+
                                     }
                                 }
                             }
                         }
                     }
 
-                    catch (Exception e)
+                    catch //(Exception e)
                     {
 
                     }
@@ -140,6 +167,17 @@ namespace MovieSorter
 
             else MessageBox.Show(@"No such Folder");
 
+        }
+
+        private bool TestYear(dynamic episodes)
+        {
+            foreach (var episode in episodes)
+            {
+               string releas = episode.Released.ToString();
+                if (releas.Contains("2016")) return true;
+
+            }
+            return false;
         }
 
         private static IEnumerable<string> GetFiles(string path, string pattern)
