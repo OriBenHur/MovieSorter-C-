@@ -155,6 +155,7 @@ namespace MovieSorter
                                         }
                                         tmpName = tmpName.Substring(0, tmpName.Length - 1);
                                         var uri = baseURL + "?s=" + tmpName + "&type=movie&r=json";
+                                        tmpName = tmpName.Replace(".", " ");
                                         WebRequest request = WebRequest.Create(uri);
                                         request.Credentials = CredentialCache.DefaultCredentials;
                                         WebResponse response = request.GetResponse();
