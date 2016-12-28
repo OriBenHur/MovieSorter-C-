@@ -27,10 +27,10 @@ namespace MovieSorter
         }
 
 
-        private void Counter()
+        private void Counter(List<string>match)
         {
-            if (MatchList.Count > 1 || MatchList.Count == 0) Count.Text = MatchList.Count + @" Items in MatchList";
-            else Count.Text = MatchList.Count + @" Item in MatchList";
+            if (match.Count > 1 || match.Count == 0) Count.Text = match.Count + @" Items in MatchList";
+            else Count.Text = match.Count + @" Item in MatchList";
         }
 
         private void Add(string box, string index, string path)
@@ -51,20 +51,7 @@ namespace MovieSorter
             Query();
         }
 
-        private List<string> MatchFiles = new List<string>();
-        private List<string> IgnoreFiles = new List<string>();
 
-        private List<string> MatchList
-        {
-            get { return MatchFiles; }
-            set { MatchFiles = value; }
-        }
-
-        private List<string> IgnoreList
-        {
-            get { return IgnoreFiles; }
-            set { IgnoreFiles = value; }
-        }
 
 
         private void Query()
@@ -75,19 +62,16 @@ namespace MovieSorter
             listView1.Items.Clear();
             var match = new List<string>();
             var ignore = new List<string>();
-
-            MatchList = match;
-            IgnoreList = ignore;
-
-
+           
             if (Directory.Exists(Source_dir.Text))
             {
                 var allfiles = GetFiles(Source_dir.Text, "*.*");
                 var i = 1;
                 foreach (var name in allfiles)
                 {
-                    var Dir = Path.GetDirectoryName(name);
-                    if (!(match.Contains(Dir)) && !(ignore.Contains(Dir)) && !(match.Contains(name)))
+                    var potential = new List<dynamic>();
+                    var dir = Path.GetDirectoryName(name);
+                    if (!(match.Contains(dir)) && !(ignore.Contains(dir)) && !(match.Contains(name)))
                     {
                         var extension = Path.GetExtension(name);
                         if (extension == null) continue;
@@ -95,19 +79,19 @@ namespace MovieSorter
                         if (ext.Equals(".mp4") || ext.Equals(".avi") || ext.Equals(".mkv"))
                         {
                             var file = Path.GetFileNameWithoutExtension(name);
-                            var SP = new Regex("[sS][0-9]{2}[eE][0-9]{2}");
-                            if (SP.IsMatch(file))
+                            var sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}");
+                            if (sp.IsMatch(file))
                             {
                                 var S_pattern = "[sS][0-9]{2}";
-                                var S = Regex.Match(file, S_pattern);
-                                var Series = S.Value;
-                                Series = Series.Replace("S", " ");
-                                SP = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
-                                var EP = SP.Replace(file, string.Empty);
-                                var uri = baseURL + "?t=" + EP + "&Season=" + Series + "&r=json";
-                                WebRequest request = WebRequest.Create(uri);
+                                var s = Regex.Match(file, S_pattern);
+                                var series = s.Value;
+                                series = series.Replace("S", " ");
+                                sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
+                                var ep = sp.Replace(file, string.Empty);
+                                var uri = baseURL + "?t=" + ep + "&Season=" + series + "&r=json";
+                                var request = WebRequest.Create(uri);
                                 request.Credentials = CredentialCache.DefaultCredentials;
-                                WebResponse response = request.GetResponse();
+                                var response = request.GetResponse();
                                 // Get the stream containing content returned by the server.
                                 var dataStream = response.GetResponseStream();
                                 // Open the stream using a StreamReader for easy access.
@@ -122,24 +106,24 @@ namespace MovieSorter
                                 response.Close();
                                 if (TestYear(episodes))
                                 {
-                                    match.Add(Dir);
+                                    match.Add(dir);
                                     progressBar1.Visible = true;
                                     progressBar1.Minimum = 0;
                                     progressBar1.Maximum = match.Count;
                                     progressBar1.Value = 0;
                                     progressBar1.Step = 1;
                                 }
-                                else ignore.Add(Dir);
+                                else ignore.Add(dir);
                             }
 
                             else
                             {
                                 {
-                                    var M_pattern = "[0-9]{4}";
-                                    var M = Regex.Match(file, M_pattern);
+                                    var mPattern = "[0-9]{4}";
+                                    var m = Regex.Match(file, mPattern);
                                     int year;
-                                    if (!M.Success) year = 0;
-                                    else year = int.Parse(M.Value);
+                                    if (!m.Success) year = 0;
+                                    else year = int.Parse(m.Value);
                                     if (year >= 1900 && year < 2100)
                                     {
                                         if (year == 2016) match.Add(name);
@@ -156,30 +140,49 @@ namespace MovieSorter
                                         tmpName = tmpName.Substring(0, tmpName.Length - 1);
                                         var uri = baseURL + "?s=" + tmpName + "&type=movie&r=json";
                                         tmpName = tmpName.Replace(".", " ");
-                                        WebRequest request = WebRequest.Create(uri);
+                                        var request = WebRequest.Create(uri);
                                         request.Credentials = CredentialCache.DefaultCredentials;
-                                        WebResponse response = request.GetResponse();
-                                        // Get the stream containing content returned by the server.
+                                        var response = request.GetResponse();
                                         var dataStream = response.GetResponseStream();
-                                        // Open the stream using a StreamReader for easy access.
                                         var reader = new StreamReader(dataStream);
-                                        // Read the content.
                                         var responseFromServer = reader.ReadToEnd();
-                                        // Display the content.
                                         dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
                                         string tmpResult = result.ToString();
-                                        tmpResult = tmpResult.Replace("\\\"", "");
                                         tmpResult = tmpResult.Replace("\r\n", string.Empty);
-                                        tmpResult = tmpResult.Substring(tmpResult.IndexOf("["),
-                                            tmpResult.IndexOf("]") - 9);
-                                        tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
+                                        var start = tmpResult.IndexOf("[", StringComparison.Ordinal);
+                                        tmpResult = tmpResult.Substring(start, tmpResult.Length- start);
+                                        var end = tmpResult.IndexOf("]", StringComparison.Ordinal)+1;
+                                        tmpResult = tmpResult.Substring(0, end);
+                                        //tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
                                         result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
                                         foreach (var item in result)
                                         {
-                                            if(item.Title.ToString().Equals(tmpName) && item.Type.ToString().Equals("movie"))
-                                                if (item.Year.ToString().Equals("2016")) match.Add(name);
+                                            if (item.Title.ToString().Equals(tmpName) &&
+                                                item.Type.ToString().Equals("movie")) potential.Add(item);
                                         }
-
+                                        if (potential.Count == 1)
+                                        {
+                                            if (potential[0].Year.ToString() == "2016")
+                                                match.Add(name);
+                                        }
+                                        else
+                                        {
+                                            var msg = new MsgBox();
+                                            var imdbID = "";
+                                            var imdburl = "http://www.imdb.com/title/";
+                                            var x = 25;
+                                            var y = 10;
+                                            foreach (var potentialItem in potential)
+                                            {
+                                               
+                                                //imdbID = imdburl + potentialItem.imdbID.ToString();
+                                                msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), x , y);
+                                                y+= 20;
+                                            }
+                                            //MessageBox.Show("rrrrrrrrrrrrrrrrrrrr" + Environment.NewLine+ "rrrrrrrrrrrrrrrrrrrrr" + Environment.NewLine + "rrrrrrrrrrrrrrrrrrrrr");
+                                            msg.ShowDialog();
+                                            
+                                        }
                                     }
                                 }
                             }
@@ -198,7 +201,7 @@ namespace MovieSorter
                 listView1.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
                 listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.ColumnContent);
                 listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.HeaderSize);
-                Counter();
+                Counter(match);
             }
 
             else MessageBox.Show(@"No such Folder");
