@@ -5,7 +5,7 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
-
+using System.Threading.Tasks;
 
 namespace MovieSorter
 {
@@ -27,7 +27,7 @@ namespace MovieSorter
         }
 
 
-        private void Counter(List<string>match)
+        private void Counter(List<string> match)
         {
             if (match.Count > 1 || match.Count == 0) Count.Text = match.Count + @" Items in MatchList";
             else Count.Text = match.Count + @" Item in MatchList";
@@ -36,7 +36,7 @@ namespace MovieSorter
         private void Add(string box, string index, string path)
         {
             progressBar1.PerformStep();
-            string[] row = { box, index, path };
+            string[] row = {box, index, path};
             var item = new ListViewItem(row);
             listView1.Items.Add(item);
 
@@ -48,7 +48,6 @@ namespace MovieSorter
             var result = fs.ShowDialog();
             if (!result) return;
             Source_dir.Text = fs.FileName;
-            Query();
         }
 
 
@@ -57,12 +56,13 @@ namespace MovieSorter
         private void Query()
         {
             var filters =
-                new Regex(@"(CAMRip|CAM|TS|TELESYNC|PDVD|PTVD|PPVRip|SCR|SCREENER|DVDSCR|DVDSCREENER|BDSCR|R4|R5|R5LINE|R5.LINE|DVD|DVD5|DVD9|DVDRip|DVDR|TVRip|DSR|PDTV|SDTV|HDTV|HDTVRip|DVB|DVBRip|DTHRip|VODRip|VODR|BDRip|BRRip|BR.Rip|BluRay|Blu.Ray|BD|BDR|BD25|BD50|3D.BluRay|3DBluRay|3DBD|Remux|BDRemux|BR.Scr|BR.Screener|HDDVD|HDRip|WorkPrint|VHS|VCD|TELECINE|WEBRip|WEB.Rip|WEBDL|WEB.DL|WEBCap|WEB.Cap|ithd|iTunesHD|Laserdisc|AmazonHD|NetflixHD|NetflixUHD|VHSRip|LaserRip|URip|UnknownRip|MicroHD|WP|TC|PPV|DDC|R5.AC3.5.1.HQ|DVD-Full|DVDFull|Full-Rip|FullRip|DSRip|SATRip|BD5|BD9|Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|(Ultimate.)?(Director.?s|Theatrical|Ultimate|Final|Rogue|Collectors|Special|Despecialized).(Cut|Edition|Version)|((H|HALF|F|FULL)[^\\p{Alnum}]{0,2})?(SBS|TAB|OU)|DivX|Xvid|AVC|(x|h)[.]?(264|265)|HEVC|3ivx|PGS|MP[E]?G[45]?|MP[34]|(FLAC|AAC|AC3|DD|MA).?[2457][.]?[01]|[26]ch|(Multi.)?DTS(.HD)?(.MA)?|FLAC|AAC|AC3|TrueHD|Atmos|[M0]?(420|480|720|1080|1440|2160)[pi]|(?<=[-.])(420|480|720|1080|2D|3D)|10.?bit|(24|30|60)FPS|Hi10[P]?|[a-z]{2,3}.(2[.]0|5[.]1)|(19|20)[0-9]+(.)S[0-9]+(?!(.)?E[0-9]+)|(?<=\\d+)v[0-4]|CD\\d+|3D|2D)");
+                new Regex(
+                    @"(CAMRip|CAM|TS|TELESYNC|PDVD|PTVD|PPVRip|SCR|SCREENER|DVDSCR|DVDSCREENER|BDSCR|R4|R5|R5LINE|R5.LINE|DVD|DVD5|DVD9|DVDRip|DVDR|TVRip|DSR|PDTV|SDTV|HDTV|HDTVRip|DVB|DVBRip|DTHRip|VODRip|VODR|BDRip|BRRip|BR.Rip|BluRay|Blu.Ray|BD|BDR|BD25|BD50|3D.BluRay|3DBluRay|3DBD|Remux|BDRemux|BR.Scr|BR.Screener|HDDVD|HDRip|WorkPrint|VHS|VCD|TELECINE|WEBRip|WEB.Rip|WEBDL|WEB.DL|WEBCap|WEB.Cap|ithd|iTunesHD|Laserdisc|AmazonHD|NetflixHD|NetflixUHD|VHSRip|LaserRip|URip|UnknownRip|MicroHD|WP|TC|PPV|DDC|R5.AC3.5.1.HQ|DVD-Full|DVDFull|Full-Rip|FullRip|DSRip|SATRip|BD5|BD9|Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|(Ultimate.)?(Director.?s|Theatrical|Ultimate|Final|Rogue|Collectors|Special|Despecialized).(Cut|Edition|Version)|((H|HALF|F|FULL)[^\\p{Alnum}]{0,2})?(SBS|TAB|OU)|DivX|Xvid|AVC|(x|h)[.]?(264|265)|HEVC|3ivx|PGS|MP[E]?G[45]?|MP[34]|(FLAC|AAC|AC3|DD|MA).?[2457][.]?[01]|[26]ch|(Multi.)?DTS(.HD)?(.MA)?|FLAC|AAC|AC3|TrueHD|Atmos|[M0]?(420|480|720|1080|1440|2160)[pi]|(?<=[-.])(420|480|720|1080|2D|3D)|10.?bit|(24|30|60)FPS|Hi10[P]?|[a-z]{2,3}.(2[.]0|5[.]1)|(19|20)[0-9]+(.)S[0-9]+(?!(.)?E[0-9]+)|(?<=\\d+)v[0-4]|CD\\d+|3D|2D)");
             var baseURL = "http://www.omdbapi.com/";
             listView1.Items.Clear();
             var match = new List<string>();
             var ignore = new List<string>();
-           
+
             if (Directory.Exists(Source_dir.Text))
             {
                 var allfiles = GetFiles(Source_dir.Text, "*.*");
@@ -150,8 +150,8 @@ namespace MovieSorter
                                         string tmpResult = result.ToString();
                                         tmpResult = tmpResult.Replace("\r\n", string.Empty);
                                         var start = tmpResult.IndexOf("[", StringComparison.Ordinal);
-                                        tmpResult = tmpResult.Substring(start, tmpResult.Length- start);
-                                        var end = tmpResult.IndexOf("]", StringComparison.Ordinal)+1;
+                                        tmpResult = tmpResult.Substring(start, tmpResult.Length - start);
+                                        var end = tmpResult.IndexOf("]", StringComparison.Ordinal) + 1;
                                         tmpResult = tmpResult.Substring(0, end);
                                         //tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
                                         result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
@@ -168,20 +168,24 @@ namespace MovieSorter
                                         else
                                         {
                                             var msg = new MsgBox();
-                                            var imdbID = "";
                                             var imdburl = "http://www.imdb.com/title/";
                                             var x = 25;
-                                            var y = 10;
+                                            var y = 30;
                                             foreach (var potentialItem in potential)
                                             {
-                                               
+
                                                 //imdbID = imdburl + potentialItem.imdbID.ToString();
-                                                msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), x , y);
-                                                y+= 20;
+                                                msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), x, y);
+                                                y += 20;
                                             }
-                                            //MessageBox.Show("rrrrrrrrrrrrrrrrrrrr" + Environment.NewLine+ "rrrrrrrrrrrrrrrrrrrrr" + Environment.NewLine + "rrrrrrrrrrrrrrrrrrrrr");
+                                            msg.MyTitle = tmpName + " Conflicts";
                                             msg.ShowDialog();
-                                            
+                                            foreach (var selected in potential)
+                                            {
+                                                if (selected.imdbID.ToString().Equals(msg.MyID))
+                                                    if (selected.Year.ToString() == "2016")
+                                                        match.Add(name);
+                                            }
                                         }
                                     }
                                 }
@@ -243,5 +247,132 @@ namespace MovieSorter
             return files;
         }
 
+        private void Copy_button_Click(object sender, EventArgs e)
+        {
+            if (Source_dir.Text == "")
+            {
+                errorProvider1.SetIconPadding(Copy_button, -90);
+                errorProvider1.SetError(Copy_button, "Set Source dir first");
+            }
+            else if (Distension_dir.Text == "")
+            {
+                errorProvider1.SetIconPadding(Copy_button, -90);
+                errorProvider1.SetError(Copy_button, "Set Distension dir first");
+            }
+            foreach (ListViewItem item in listView1.Items)
+            {
+                if (!item.Checked) continue;
+                try
+                {
+                    var baseDir = Source_dir.Text;
+                    var source = item.SubItems[2].Text;
+                    var size = baseDir.Length;
+                    var part = source.Remove(0, size);
+                    var dest = Distension_dir.Text + part;
+                    var attr = File.GetAttributes(item.SubItems[2].Text);
+                    if (attr != FileAttributes.Directory)
+                    {
+                        if(Directory.Exists(Path.GetDirectoryName(dest)))
+                            File.Copy(source, dest, true);
+                        else
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(dest));
+                            File.Copy(source, dest, true);
+                        }
+                    }
+                    else
+                    {
+                        DirectoryCopy(source, dest, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private void Browes_Destination_Click(object sender, EventArgs e)
+        {
+            var fs = new FolderSelectDialog();
+            var result = fs.ShowDialog();
+            if (!result) return;
+            Distension_dir.Text = fs.FileName;
+        }
+
+        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            // If the destination directory doesn't exist, create it.
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string temppath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(temppath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string temppath = Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+                }
+            }
+        }
+
+        private void Check_All_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Check_All.Checked)
+            {
+                for (var i = 0; i < listView1.Items.Count; i++)
+                {
+                    listView1.Items[i].Checked = true;
+                }
+            }
+            else
+            {
+                for (var i = 0; i < listView1.Items.Count; i++)
+                {
+                    listView1.Items[i].Checked = false;
+                }
+            }
+        }
+
+        private void Go_button_Click(object sender, EventArgs e)
+        {
+            Query();
+        }
+
+        private void Source_dir_TextChanged(object sender, EventArgs e)
+        {
+            if (Source_dir.Text == "" || Distension_dir.Text == "")
+                Go_button.Enabled = false;
+            else Go_button.Enabled = true;
+        }
+
+        private void Distension_dir_TextChanged(object sender, EventArgs e)
+        {
+            if (Source_dir.Text == "" || Distension_dir.Text == "")
+                Go_button.Enabled = false;
+            else Go_button.Enabled = true;
+        }
     }
 }
