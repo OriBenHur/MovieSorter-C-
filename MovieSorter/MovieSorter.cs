@@ -5,7 +5,8 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Microsoft.VisualBasic.FileIO;
+using SearchOption = System.IO.SearchOption;
 
 namespace MovieSorter
 {
@@ -36,7 +37,7 @@ namespace MovieSorter
         private void Add(string box, string index, string path)
         {
             progressBar1.PerformStep();
-            string[] row = {box, index, path};
+            string[] row = { box, index, path };
             var item = new ListViewItem(row);
             listView1.Items.Add(item);
 
@@ -148,43 +149,50 @@ namespace MovieSorter
                                         var responseFromServer = reader.ReadToEnd();
                                         dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
                                         string tmpResult = result.ToString();
-                                        tmpResult = tmpResult.Replace("\r\n", string.Empty);
-                                        var start = tmpResult.IndexOf("[", StringComparison.Ordinal);
-                                        tmpResult = tmpResult.Substring(start, tmpResult.Length - start);
-                                        var end = tmpResult.IndexOf("]", StringComparison.Ordinal) + 1;
-                                        tmpResult = tmpResult.Substring(0, end);
-                                        //tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
-                                        result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
-                                        foreach (var item in result)
+                                        response.Close();
+                                        dataStream.Close();
+                                        reader.Close();
+                                        if (result.Response != "False")
                                         {
-                                            if (item.Title.ToString().Equals(tmpName) &&
-                                                item.Type.ToString().Equals("movie")) potential.Add(item);
-                                        }
-                                        if (potential.Count == 1)
-                                        {
-                                            if (potential[0].Year.ToString() == "2016")
-                                                match.Add(name);
-                                        }
-                                        else
-                                        {
-                                            var msg = new MsgBox();
-                                            var imdburl = "http://www.imdb.com/title/";
-                                            var x = 25;
-                                            var y = 30;
-                                            foreach (var potentialItem in potential)
+                                            tmpResult = tmpResult.Replace("\r\n", string.Empty);
+                                            var start = tmpResult.IndexOf("[", StringComparison.Ordinal);
+                                            tmpResult = tmpResult.Substring(start, tmpResult.Length - start);
+                                            var end = tmpResult.LastIndexOf("]", StringComparison.Ordinal) + 1;
+                                            tmpResult = tmpResult.Substring(0, end);
+                                            //tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
+                                            result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
+                                            foreach (var item in result)
                                             {
-
-                                                //imdbID = imdburl + potentialItem.imdbID.ToString();
-                                                msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), x, y);
-                                                y += 20;
+                                                if (item.Title.ToString().Equals(tmpName) &&
+                                                    item.Type.ToString().Equals("movie")) potential.Add(item);
                                             }
-                                            msg.MyTitle = tmpName + " Conflicts";
-                                            msg.ShowDialog();
-                                            foreach (var selected in potential)
+                                            if (potential.Count == 1)
                                             {
-                                                if (selected.imdbID.ToString().Equals(msg.MyID))
-                                                    if (selected.Year.ToString() == "2016")
-                                                        match.Add(name);
+                                                if (potential[0].Year.ToString() == "2016")
+                                                    match.Add(name);
+                                            }
+
+                                            else if(potential.Count != 0)
+                                            {
+                                                var msg = new MsgBox();
+                                                var imdburl = "http://www.imdb.com/title/";
+                                                var x = 25;
+                                                var y = 30;
+                                                foreach (var potentialItem in potential)
+                                                {
+
+                                                    //imdbID = imdburl + potentialItem.imdbID.ToString();
+                                                    msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), x, y);
+                                                    y += 20;
+                                                }
+                                                msg.MyTitle = tmpName + " Conflicts";
+                                                msg.ShowDialog();
+                                                foreach (var selected in potential)
+                                                {
+                                                    if (selected.imdbID.ToString().Equals(msg.MyID))
+                                                        if (selected.Year.ToString() == "2016")
+                                                            match.Add(name);
+                                                }
                                             }
                                         }
                                     }
@@ -247,47 +255,55 @@ namespace MovieSorter
             return files;
         }
 
-        private void Copy_button_Click(object sender, EventArgs e)
+        private void Move_button_Click(object sender, EventArgs e)
         {
             if (Source_dir.Text == "")
             {
-                errorProvider1.SetIconPadding(Copy_button, -90);
-                errorProvider1.SetError(Copy_button, "Set Source dir first");
+                errorProvider1.SetIconPadding(Move_button, -90);
+                errorProvider1.SetError(Move_button, "Set Source dir first");
             }
             else if (Distension_dir.Text == "")
             {
-                errorProvider1.SetIconPadding(Copy_button, -90);
-                errorProvider1.SetError(Copy_button, "Set Distension dir first");
+                errorProvider1.SetIconPadding(Move_button, -90);
+                errorProvider1.SetError(Move_button, "Set Distension dir first");
             }
-            foreach (ListViewItem item in listView1.Items)
+            else
             {
-                if (!item.Checked) continue;
-                try
+                foreach (ListViewItem item in listView1.Items)
                 {
-                    var baseDir = Source_dir.Text;
-                    var source = item.SubItems[2].Text;
-                    var size = baseDir.Length;
-                    var part = source.Remove(0, size);
-                    var dest = Distension_dir.Text + part;
-                    var attr = File.GetAttributes(item.SubItems[2].Text);
-                    if (attr != FileAttributes.Directory)
+                    if (!item.Checked) continue;
+                    try
                     {
-                        if(Directory.Exists(Path.GetDirectoryName(dest)))
-                            File.Copy(source, dest, true);
+                        var baseDir = Source_dir.Text;
+                        var source = item.SubItems[2].Text;
+                        var size = baseDir.Length;
+                        var part = source.Remove(0, size);
+                        var dest = Distension_dir.Text + part;
+                        var attr = File.GetAttributes(item.SubItems[2].Text);
+                        if (attr != FileAttributes.Directory)
+                        {
+                            if (Directory.Exists(Path.GetDirectoryName(dest)))
+
+                                //FileSystem.CopyFile(source, dest, UIOption.AllDialogs);
+                                FileSystem.MoveFile(source, dest, UIOption.AllDialogs);
+
+
+                            else
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(dest));
+                                FileSystem.MoveFile(source, dest, UIOption.AllDialogs);
+                            }
+                        }
                         else
                         {
-                            Directory.CreateDirectory(Path.GetDirectoryName(dest));
-                            File.Copy(source, dest, true);
+                            FileSystem.MoveDirectory(source, dest, UIOption.AllDialogs);
+                            //DirectoryCopy(source, dest, true);
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        DirectoryCopy(source, dest, true);
+                        MessageBox.Show(ex.Message);
                     }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
                 }
             }
         }

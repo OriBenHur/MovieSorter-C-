@@ -33,7 +33,7 @@
             this.Check_All = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.Count = new System.Windows.Forms.Label();
-            this.Copy_button = new System.Windows.Forms.Button();
+            this.Move_button = new System.Windows.Forms.Button();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.Source_dir = new System.Windows.Forms.TextBox();
             this.Distension_dir = new System.Windows.Forms.TextBox();
@@ -83,15 +83,15 @@
             this.Count.Size = new System.Drawing.Size(0, 13);
             this.Count.TabIndex = 8;
             // 
-            // Copy_button
+            // Move_button
             // 
-            this.Copy_button.Location = new System.Drawing.Point(701, 477);
-            this.Copy_button.Name = "Copy_button";
-            this.Copy_button.Size = new System.Drawing.Size(75, 23);
-            this.Copy_button.TabIndex = 9;
-            this.Copy_button.Text = "Copy";
-            this.Copy_button.UseVisualStyleBackColor = true;
-            this.Copy_button.Click += new System.EventHandler(this.Copy_button_Click);
+            this.Move_button.Location = new System.Drawing.Point(701, 477);
+            this.Move_button.Name = "Move_button";
+            this.Move_button.Size = new System.Drawing.Size(75, 23);
+            this.Move_button.TabIndex = 9;
+            this.Move_button.Text = "Move";
+            this.Move_button.UseVisualStyleBackColor = true;
+            this.Move_button.Click += new System.EventHandler(this.Move_button_Click);
             // 
             // errorProvider1
             // 
@@ -151,7 +151,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 526);
             this.Controls.Add(this.Go_button);
-            this.Controls.Add(this.Copy_button);
+            this.Controls.Add(this.Move_button);
             this.Controls.Add(this.Count);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.Check_All);
@@ -174,7 +174,7 @@
         private System.Windows.Forms.CheckBox Check_All;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label Count;
-        private System.Windows.Forms.Button Copy_button;
+        private System.Windows.Forms.Button Move_button;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.Button Go_button;
         private System.Windows.Forms.Button Browes_Destination;
