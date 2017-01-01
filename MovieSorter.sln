@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26014.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieSorter", "MovieSorter\MovieSorter.csproj", "{39D6283F-4D5B-414A-B938-D72F46709504}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieSorter", "MovieSorter\MovieSorter.csproj", "{7CD4C5C4-1A71-4B26-9AC8-5C86E5A43A7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{39D6283F-4D5B-414A-B938-D72F46709504}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39D6283F-4D5B-414A-B938-D72F46709504}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{39D6283F-4D5B-414A-B938-D72F46709504}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39D6283F-4D5B-414A-B938-D72F46709504}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CD4C5C4-1A71-4B26-9AC8-5C86E5A43A7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CD4C5C4-1A71-4B26-9AC8-5C86E5A43A7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CD4C5C4-1A71-4B26-9AC8-5C86E5A43A7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CD4C5C4-1A71-4B26-9AC8-5C86E5A43A7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

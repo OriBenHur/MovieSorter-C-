@@ -172,7 +172,7 @@ namespace MovieSorter
                                                     match.Add(name);
                                             }
 
-                                            else if(potential.Count != 0)
+                                            else if (potential.Count != 0)
                                             {
                                                 var msg = new MsgBox();
                                                 var imdburl = "http://www.imdb.com/title/";
