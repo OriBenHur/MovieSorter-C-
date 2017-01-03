@@ -390,5 +390,32 @@ namespace MovieSorter
                 Go_button.Enabled = false;
             else Go_button.Enabled = true;
         }
+
+        private void Year_TextBox_TextChanged(object sender, EventArgs e)
+        {
+
+            if (Regex.IsMatch(Year_TextBox.Text, "[^0-9]"))
+            {
+                Year_TextBox.Text = Year_TextBox.Text.Substring(0, Year_TextBox.Text.Length - 1);
+                Year_TextBox.Focus();
+                Year_TextBox.SelectionStart = Year_TextBox.Text.Length;
+            }
+
+            if (Year_TextBox.TextLength == 4)
+            {
+                String sDate = DateTime.Now.ToString();
+                DateTime datevalue = (Convert.ToDateTime(sDate.ToString()));
+                var Year = Int32.Parse(Year_TextBox.Text);
+                if (Year > datevalue.Year + 1 || Year < 1900)
+                {
+                    errorProvider1.SetError(Year_TextBox, "The Year you pick is worng!");
+
+                }
+            }
+
+            else
+                errorProvider1.Clear();
+
+        }
     }
 }

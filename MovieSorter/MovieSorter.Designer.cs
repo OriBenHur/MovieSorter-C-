@@ -40,24 +40,28 @@
             this.Browes_Source = new System.Windows.Forms.Button();
             this.Browes_Destination = new System.Windows.Forms.Button();
             this.Go_button = new System.Windows.Forms.Button();
+            this.Source = new System.Windows.Forms.Label();
+            this.Destination = new System.Windows.Forms.Label();
+            this.Year = new System.Windows.Forms.Label();
+            this.Year_TextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
             // 
             // listView1
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView1.Location = new System.Drawing.Point(12, 74);
+            this.listView1.Location = new System.Drawing.Point(12, 97);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(764, 397);
+            this.listView1.Size = new System.Drawing.Size(764, 433);
             this.listView1.TabIndex = 4;
             this.listView1.UseCompatibleStateImageBehavior = false;
             // 
             // Check_All
             // 
             this.Check_All.AutoSize = true;
-            this.Check_All.Location = new System.Drawing.Point(18, 81);
+            this.Check_All.Location = new System.Drawing.Point(18, 105);
             this.Check_All.Name = "Check_All";
             this.Check_All.Size = new System.Drawing.Size(15, 14);
             this.Check_All.TabIndex = 5;
@@ -66,26 +70,28 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(12, 477);
+            this.progressBar1.Location = new System.Drawing.Point(12, 536);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(670, 23);
             this.progressBar1.TabIndex = 6;
             // 
             // Count
             // 
-            this.Count.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.Count.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.Count.AutoSize = true;
-            this.Count.Location = new System.Drawing.Point(12, 507);
+            this.Count.Location = new System.Drawing.Point(12, 566);
             this.Count.Name = "Count";
             this.Count.Size = new System.Drawing.Size(0, 13);
             this.Count.TabIndex = 8;
             // 
             // Move_button
             // 
-            this.Move_button.Location = new System.Drawing.Point(701, 477);
+            this.Move_button.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Move_button.Location = new System.Drawing.Point(701, 536);
             this.Move_button.Name = "Move_button";
             this.Move_button.Size = new System.Drawing.Size(75, 23);
             this.Move_button.TabIndex = 9;
@@ -99,23 +105,23 @@
             // 
             // Source_dir
             // 
-            this.Source_dir.Location = new System.Drawing.Point(12, 12);
+            this.Source_dir.Location = new System.Drawing.Point(104, 12);
             this.Source_dir.Name = "Source_dir";
-            this.Source_dir.Size = new System.Drawing.Size(322, 20);
+            this.Source_dir.Size = new System.Drawing.Size(300, 20);
             this.Source_dir.TabIndex = 0;
             this.Source_dir.TextChanged += new System.EventHandler(this.Source_dir_TextChanged);
             // 
             // Distension_dir
             // 
-            this.Distension_dir.Location = new System.Drawing.Point(12, 38);
+            this.Distension_dir.Location = new System.Drawing.Point(104, 38);
             this.Distension_dir.Name = "Distension_dir";
-            this.Distension_dir.Size = new System.Drawing.Size(322, 20);
+            this.Distension_dir.Size = new System.Drawing.Size(300, 20);
             this.Distension_dir.TabIndex = 1;
             this.Distension_dir.TextChanged += new System.EventHandler(this.Distension_dir_TextChanged);
             // 
             // Browes_Source
             // 
-            this.Browes_Source.Location = new System.Drawing.Point(341, 8);
+            this.Browes_Source.Location = new System.Drawing.Point(410, 11);
             this.Browes_Source.Name = "Browes_Source";
             this.Browes_Source.Size = new System.Drawing.Size(109, 23);
             this.Browes_Source.TabIndex = 2;
@@ -125,7 +131,7 @@
             // 
             // Browes_Destination
             // 
-            this.Browes_Destination.Location = new System.Drawing.Point(341, 38);
+            this.Browes_Destination.Location = new System.Drawing.Point(410, 37);
             this.Browes_Destination.Name = "Browes_Destination";
             this.Browes_Destination.Size = new System.Drawing.Size(109, 23);
             this.Browes_Destination.TabIndex = 3;
@@ -136,20 +142,60 @@
             // Go_button
             // 
             this.Go_button.Enabled = false;
-            this.Go_button.Location = new System.Drawing.Point(456, 8);
+            this.Go_button.Location = new System.Drawing.Point(525, 11);
             this.Go_button.Name = "Go_button";
-            this.Go_button.Size = new System.Drawing.Size(75, 53);
+            this.Go_button.Size = new System.Drawing.Size(75, 50);
             this.Go_button.TabIndex = 10;
             this.Go_button.TabStop = false;
             this.Go_button.Text = "Go!";
             this.Go_button.UseVisualStyleBackColor = true;
             this.Go_button.Click += new System.EventHandler(this.Go_button_Click);
             // 
+            // Source
+            // 
+            this.Source.AutoSize = true;
+            this.Source.Location = new System.Drawing.Point(12, 19);
+            this.Source.Name = "Source";
+            this.Source.Size = new System.Drawing.Size(44, 13);
+            this.Source.TabIndex = 11;
+            this.Source.Text = "Source:";
+            // 
+            // Destination
+            // 
+            this.Destination.AutoSize = true;
+            this.Destination.Location = new System.Drawing.Point(12, 43);
+            this.Destination.Name = "Destination";
+            this.Destination.Size = new System.Drawing.Size(63, 13);
+            this.Destination.TabIndex = 12;
+            this.Destination.Text = "Destination:";
+            // 
+            // Year
+            // 
+            this.Year.AutoSize = true;
+            this.Year.Location = new System.Drawing.Point(12, 67);
+            this.Year.Name = "Year";
+            this.Year.Size = new System.Drawing.Size(88, 13);
+            this.Year.TabIndex = 14;
+            this.Year.Text = "Year To Filter By:";
+            // 
+            // Year_TextBox
+            // 
+            this.Year_TextBox.Location = new System.Drawing.Point(104, 64);
+            this.Year_TextBox.MaxLength = 4;
+            this.Year_TextBox.Name = "Year_TextBox";
+            this.Year_TextBox.Size = new System.Drawing.Size(35, 20);
+            this.Year_TextBox.TabIndex = 13;
+            this.Year_TextBox.TextChanged += new System.EventHandler(this.Year_TextBox_TextChanged);
+            // 
             // MovieSorter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(788, 526);
+            this.ClientSize = new System.Drawing.Size(788, 585);
+            this.Controls.Add(this.Year);
+            this.Controls.Add(this.Year_TextBox);
+            this.Controls.Add(this.Destination);
+            this.Controls.Add(this.Source);
             this.Controls.Add(this.Go_button);
             this.Controls.Add(this.Move_button);
             this.Controls.Add(this.Count);
@@ -181,6 +227,10 @@
         private System.Windows.Forms.Button Browes_Source;
         private System.Windows.Forms.TextBox Distension_dir;
         private System.Windows.Forms.TextBox Source_dir;
+        private System.Windows.Forms.Label Year;
+        private System.Windows.Forms.TextBox Year_TextBox;
+        private System.Windows.Forms.Label Destination;
+        private System.Windows.Forms.Label Source;
     }
 }
 
