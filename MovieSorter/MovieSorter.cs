@@ -440,7 +440,11 @@ namespace MovieSorter
                     _error = false;
 
                 }
-                else errorProvider1.Clear();
+                else
+                {
+                    errorProvider1.Clear();
+                    _error = false;
+                }
             }
 
             else
