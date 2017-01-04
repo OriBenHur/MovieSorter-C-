@@ -409,7 +409,7 @@ namespace MovieSorter
             }
         }
 
-        private static bool _error;
+        private static bool _error = true;
         private void Year_TextBox_TextChanged(object sender, EventArgs e)
         {
 
