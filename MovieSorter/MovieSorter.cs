@@ -83,7 +83,7 @@ namespace MovieSorter
                         {
                             var file = Path.GetFileNameWithoutExtension(name);
                             var sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}");
-                            if (sp.IsMatch(file))
+                            if (file != null && sp.IsMatch(file))
                             {
                                 var S_pattern = "[sS][0-9]{2}";
                                 var s = Regex.Match(file, S_pattern);
@@ -98,35 +98,37 @@ namespace MovieSorter
                                 // Get the stream containing content returned by the server.
                                 var dataStream = response.GetResponseStream();
                                 // Open the stream using a StreamReader for easy access.
-                                var reader = new StreamReader(dataStream);
-                                // Read the content.
-                                var responseFromServer = reader.ReadToEnd();
-                                // Display the content.
-                                dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
-                                var episodes = result.Episodes;
-                                // Clean up the streams and the response.
-                                reader.Close();
-                                response.Close();
-                                if (TestYear(episodes))
+                                if (dataStream != null)
                                 {
-                                    match.Add(dir);
-                                    progressBar1.Visible = true;
-                                    progressBar1.Minimum = 0;
-                                    progressBar1.Maximum = match.Count;
-                                    progressBar1.Value = 0;
-                                    progressBar1.Step = 1;
+                                    var reader = new StreamReader(dataStream);
+                                    // Read the content.
+                                    var responseFromServer = reader.ReadToEnd();
+                                    // Display the content.
+                                    dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
+                                    var episodes = result.Episodes;
+                                    // Clean up the streams and the response.
+                                    reader.Close();
+                                    response.Close();
+                                    if (TestYear(episodes))
+                                    {
+                                        match.Add(dir);
+                                        progressBar1.Visible = true;
+                                        progressBar1.Minimum = 0;
+                                        progressBar1.Maximum = match.Count;
+                                        progressBar1.Value = 0;
+                                        progressBar1.Step = 1;
+                                    }
+                                    else ignore.Add(dir);
                                 }
-                                else ignore.Add(dir);
                             }
 
                             else
                             {
                                 {
-                                    var mPattern = "[0-9]{4}";
-                                    var m = Regex.Match(file, mPattern);
-                                    int year;
-                                    if (!m.Success) year = 0;
-                                    else year = int.Parse(m.Value);
+                                    const string mPattern = "[0-9]{4}";
+                                    var input = file;
+                                    var m = Regex.Match(input, mPattern);
+                                    var year = !m.Success ? 0 : int.Parse(m.Value);
                                     if (year >= 1889 && year < 2100)
                                     {
                                         if (year == int.Parse(Year_TextBox.Text)) match.Add(name);
@@ -177,8 +179,8 @@ namespace MovieSorter
                                             else if (potential.Count != 0)
                                             {
                                                 var msg = new MsgBox();
-                                                var imdburl = "http://www.imdb.com/title/";
-                                                var x = 25;
+                                                const string imdburl = "http://www.imdb.com/title/";
+                                                const int x = 25;
                                                 var y = 30;
                                                 foreach (var potentialItem in potential)
                                                 {
@@ -318,43 +320,43 @@ namespace MovieSorter
             Distension_dir.Text = fs.FileName;
         }
 
-        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-        {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+        //private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        //{
+        //    // Get the subdirectories for the specified directory.
+        //    DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
-            }
+        //    if (!dir.Exists)
+        //    {
+        //        throw new DirectoryNotFoundException(
+        //            "Source directory does not exist or could not be found: "
+        //            + sourceDirName);
+        //    }
 
-            DirectoryInfo[] dirs = dir.GetDirectories();
-            // If the destination directory doesn't exist, create it.
-            if (!Directory.Exists(destDirName))
-            {
-                Directory.CreateDirectory(destDirName);
-            }
+        //    DirectoryInfo[] dirs = dir.GetDirectories();
+        //    // If the destination directory doesn't exist, create it.
+        //    if (!Directory.Exists(destDirName))
+        //    {
+        //        Directory.CreateDirectory(destDirName);
+        //    }
 
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string temppath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(temppath, false);
-            }
+        //    // Get the files in the directory and copy them to the new location.
+        //    FileInfo[] files = dir.GetFiles();
+        //    foreach (FileInfo file in files)
+        //    {
+        //        string temppath = Path.Combine(destDirName, file.Name);
+        //        file.CopyTo(temppath, false);
+        //    }
 
-            // If copying subdirectories, copy them and their contents to new location.
-            if (copySubDirs)
-            {
-                foreach (DirectoryInfo subdir in dirs)
-                {
-                    string temppath = Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-                }
-            }
-        }
+        //    // If copying subdirectories, copy them and their contents to new location.
+        //    if (copySubDirs)
+        //    {
+        //        foreach (var subdir in dirs)
+        //        {
+        //            string temppath = Path.Combine(destDirName, subdir.Name);
+        //            DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+        //        }
+        //    }
+        //}
 
         private void Check_All_CheckedChanged(object sender, EventArgs e)
         {
