@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Forms;
 using System.IO;
 using System.Net;
@@ -56,6 +57,7 @@ namespace MovieSorter
 
         private void Query()
         {
+
             var filters =
                 new Regex(
                     @"(CAMRip|CAM|TS|TELESYNC|PDVD|PTVD|PPVRip|SCR|SCREENER|DVDSCR|DVDSCREENER|BDSCR|R4|R5|R5LINE|R5.LINE|DVD|DVD5|DVD9|DVDRip|DVDR|TVRip|DSR|PDTV|SDTV|HDTV|HDTVRip|DVB|DVBRip|DTHRip|VODRip|VODR|BDRip|BRRip|BR.Rip|BluRay|Blu.Ray|BD|BDR|BD25|BD50|3D.BluRay|3DBluRay|3DBD|Remux|BDRemux|BR.Scr|BR.Screener|HDDVD|HDRip|WorkPrint|VHS|VCD|TELECINE|WEBRip|WEB.Rip|WEBDL|WEB.DL|WEBCap|WEB.Cap|ithd|iTunesHD|Laserdisc|AmazonHD|NetflixHD|NetflixUHD|VHSRip|LaserRip|URip|UnknownRip|MicroHD|WP|TC|PPV|DDC|R5.AC3.5.1.HQ|DVD-Full|DVDFull|Full-Rip|FullRip|DSRip|SATRip|BD5|BD9|Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|(Ultimate.)?(Director.?s|Theatrical|Ultimate|Final|Rogue|Collectors|Special|Despecialized).(Cut|Edition|Version)|((H|HALF|F|FULL)[^\\p{Alnum}]{0,2})?(SBS|TAB|OU)|DivX|Xvid|AVC|(x|h)[.]?(264|265)|HEVC|3ivx|PGS|MP[E]?G[45]?|MP[34]|(FLAC|AAC|AC3|DD|MA).?[2457][.]?[01]|[26]ch|(Multi.)?DTS(.HD)?(.MA)?|FLAC|AAC|AC3|TrueHD|Atmos|[M0]?(420|480|720|1080|1440|2160)[pi]|(?<=[-.])(420|480|720|1080|2D|3D)|10.?bit|(24|30|60)FPS|Hi10[P]?|[a-z]{2,3}.(2[.]0|5[.]1)|(19|20)[0-9]+(.)S[0-9]+(?!(.)?E[0-9]+)|(?<=\\d+)v[0-4]|CD\\d+|3D|2D)");
@@ -125,9 +127,9 @@ namespace MovieSorter
                                     int year;
                                     if (!m.Success) year = 0;
                                     else year = int.Parse(m.Value);
-                                    if (year >= 1900 && year < 2100)
+                                    if (year >= 1889 && year < 2100)
                                     {
-                                        if (year == 2016) match.Add(name);
+                                        if (year == int.Parse(Year_TextBox.Text)) match.Add(name);
                                     }
                                     else
                                     {
@@ -168,7 +170,7 @@ namespace MovieSorter
                                             }
                                             if (potential.Count == 1)
                                             {
-                                                if (potential[0].Year.ToString() == "2016")
+                                                if (potential[0].Year.ToString() == Year_TextBox.Text)
                                                     match.Add(name);
                                             }
 
@@ -190,7 +192,7 @@ namespace MovieSorter
                                                 foreach (var selected in potential)
                                                 {
                                                     if (selected.imdbID.ToString().Equals(msg.MyID))
-                                                        if (selected.Year.ToString() == "2016")
+                                                        if (selected.Year.ToString() == Year_TextBox.Text)
                                                             match.Add(name);
                                                 }
                                             }
@@ -226,12 +228,12 @@ namespace MovieSorter
             return true;
         }
 
-        private static bool TestYear(dynamic episodes)
+        private bool TestYear(dynamic episodes)
         {
             foreach (var episode in episodes)
             {
                 string releas = episode.Released.ToString();
-                if (releas.Contains("2016")) return true;
+                if (releas.Contains(Year_TextBox.Text)) return true;
 
             }
             return false;
@@ -379,18 +381,35 @@ namespace MovieSorter
 
         private void Source_dir_TextChanged(object sender, EventArgs e)
         {
-            if (Source_dir.Text == "" || Distension_dir.Text == "")
+            if (Source_dir.Text == "" || Distension_dir.Text == "" || _error)
+            {
                 Go_button.Enabled = false;
-            else Go_button.Enabled = true;
+                Move_button.Enabled = false;
+            }
+
+            else
+            {
+                Go_button.Enabled = true;
+                Move_button.Enabled = true;
+            }
         }
 
         private void Distension_dir_TextChanged(object sender, EventArgs e)
         {
-            if (Source_dir.Text == "" || Distension_dir.Text == "")
+            if (Source_dir.Text == "" || Distension_dir.Text == "" || _error)
+            {
                 Go_button.Enabled = false;
-            else Go_button.Enabled = true;
+                Move_button.Enabled = false;
+            }
+
+            else
+            {
+                Go_button.Enabled = true;
+                Move_button.Enabled = true;
+            }
         }
 
+        private static bool _error;
         private void Year_TextBox_TextChanged(object sender, EventArgs e)
         {
 
@@ -403,19 +422,34 @@ namespace MovieSorter
 
             if (Year_TextBox.TextLength == 4)
             {
-                String sDate = DateTime.Now.ToString();
-                DateTime datevalue = (Convert.ToDateTime(sDate.ToString()));
-                var Year = Int32.Parse(Year_TextBox.Text);
-                if (Year > datevalue.Year + 1 || Year < 1900)
+                var sDate = DateTime.Now.ToString(CultureInfo.CurrentCulture);
+                var datevalue = Convert.ToDateTime(sDate);
+                var year = int.Parse(Year_TextBox.Text);
+                if (year > datevalue.Year || year < 1889)
                 {
-                    errorProvider1.SetError(Year_TextBox, "The Year you pick is worng!");
+                    errorProvider1.SetError(Year_TextBox, "The Year Most be Between 1889 - " + datevalue.Year);
+                    Go_button.Enabled = false;
+                    Move_button.Enabled = false;
+                    _error = true;
+                }
+                else if (Distension_dir.Text != "" && Source_dir.Text != "")
+                {
+                    errorProvider1.Clear();
+                    Go_button.Enabled = true;
+                    Move_button.Enabled = true;
+                    _error = false;
 
                 }
+                else errorProvider1.Clear();
             }
 
             else
+            {
                 errorProvider1.Clear();
-
+                Go_button.Enabled = false;
+                Move_button.Enabled = false;
+                _error = true;
+            }
         }
     }
 }

@@ -91,6 +91,7 @@
             // 
             this.Move_button.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.Move_button.Enabled = false;
             this.Move_button.Location = new System.Drawing.Point(701, 536);
             this.Move_button.Name = "Move_button";
             this.Move_button.Size = new System.Drawing.Size(75, 23);
