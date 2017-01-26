@@ -85,8 +85,8 @@ namespace MovieSorter
                             var sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}");
                             if (file != null && sp.IsMatch(file))
                             {
-                                var S_pattern = "[sS][0-9]{2}";
-                                var s = Regex.Match(file, S_pattern);
+                                const string sPattern = "[sS][0-9]{2}";
+                                var s = Regex.Match(file, sPattern);
                                 var series = s.Value;
                                 series = series.Replace("S", " ");
                                 sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
@@ -109,6 +109,11 @@ namespace MovieSorter
                                     // Clean up the streams and the response.
                                     reader.Close();
                                     response.Close();
+                                    if (episodes == null)
+                                    {
+                                        MessageBox.Show(file.ToString());
+                                        continue;
+                                    }
                                     if (TestYear(episodes))
                                     {
                                         match.Add(dir);
