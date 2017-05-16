@@ -33,7 +33,6 @@
             this.Check_All = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.Count = new System.Windows.Forms.Label();
-            this.Move_button = new System.Windows.Forms.Button();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.Source_dir = new System.Windows.Forms.TextBox();
             this.Distension_dir = new System.Windows.Forms.TextBox();
@@ -44,6 +43,7 @@
             this.Destination = new System.Windows.Forms.Label();
             this.Year = new System.Windows.Forms.Label();
             this.Year_TextBox = new System.Windows.Forms.TextBox();
+            this.Move_button = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -86,19 +86,6 @@
             this.Count.Name = "Count";
             this.Count.Size = new System.Drawing.Size(0, 13);
             this.Count.TabIndex = 8;
-            // 
-            // Move_button
-            // 
-            this.Move_button.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.Move_button.Enabled = false;
-            this.Move_button.Location = new System.Drawing.Point(701, 536);
-            this.Move_button.Name = "Move_button";
-            this.Move_button.Size = new System.Drawing.Size(75, 23);
-            this.Move_button.TabIndex = 9;
-            this.Move_button.Text = "Move";
-            this.Move_button.UseVisualStyleBackColor = true;
-            this.Move_button.Click += new System.EventHandler(this.Move_button_Click);
             // 
             // errorProvider1
             // 
@@ -188,6 +175,17 @@
             this.Year_TextBox.TabIndex = 13;
             this.Year_TextBox.TextChanged += new System.EventHandler(this.Year_TextBox_TextChanged);
             // 
+            // Move_button
+            // 
+            this.Move_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.Move_button.Location = new System.Drawing.Point(701, 536);
+            this.Move_button.Name = "Move_button";
+            this.Move_button.Size = new System.Drawing.Size(75, 23);
+            this.Move_button.TabIndex = 9;
+            this.Move_button.Text = "Move";
+            this.Move_button.UseVisualStyleBackColor = true;
+            this.Move_button.Click += new System.EventHandler(this.Move_button_Click);
+            // 
             // MovieSorter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -221,7 +219,6 @@
         private System.Windows.Forms.CheckBox Check_All;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label Count;
-        private System.Windows.Forms.Button Move_button;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.Button Go_button;
         private System.Windows.Forms.Button Browes_Destination;
@@ -232,6 +229,7 @@
         private System.Windows.Forms.TextBox Year_TextBox;
         private System.Windows.Forms.Label Destination;
         private System.Windows.Forms.Label Source;
+        private System.Windows.Forms.Button Move_button;
     }
 }
 

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Forms;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
 using SearchOption = System.IO.SearchOption;
+// ReSharper disable AssignNullToNotNullAttribute
 
 namespace MovieSorter
 {
@@ -65,7 +67,6 @@ namespace MovieSorter
             listView1.Items.Clear();
             var match = new List<string>();
             var ignore = new List<string>();
-
             if (Directory.Exists(Source_dir.Text))
             {
                 var allfiles = GetFiles(Source_dir.Text, "*.*");
@@ -87,10 +88,12 @@ namespace MovieSorter
                             {
                                 const string sPattern = "[sS][0-9]{2}";
                                 var s = Regex.Match(file, sPattern);
-                                var series = s.Value;
-                                series = series.Replace("S", " ");
+                                var series = s.Value.ToLower();
+                                series = series.Replace("s", "");
                                 sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
                                 var ep = sp.Replace(file, string.Empty);
+                                var last = ep[ep.Length - 1];
+                                if (last.Equals('.')) ep = ep.Substring(0, ep.Length - 1);
                                 var uri = baseURL + "?t=" + ep + "&Season=" + series + "&r=json";
                                 var request = WebRequest.Create(uri);
                                 request.Credentials = CredentialCache.DefaultCredentials;
@@ -111,7 +114,7 @@ namespace MovieSorter
                                     response.Close();
                                     if (episodes == null)
                                     {
-                                        MessageBox.Show(file.ToString());
+                                        MessageBox.Show(file);
                                         continue;
                                     }
                                     if (TestYear(episodes))
@@ -178,7 +181,11 @@ namespace MovieSorter
                                             if (potential.Count == 1)
                                             {
                                                 if (potential[0].Year.ToString() == Year_TextBox.Text)
+                                                {
                                                     match.Add(name);
+                                                    progressBar1.Maximum = match.Count;
+                                                }
+
                                             }
 
                                             else if (potential.Count != 0)
@@ -199,8 +206,13 @@ namespace MovieSorter
                                                 foreach (var selected in potential)
                                                 {
                                                     if (selected.imdbID.ToString().Equals(msg.MyID))
+                                                    {
                                                         if (selected.Year.ToString() == Year_TextBox.Text)
+                                                        {
                                                             match.Add(name);
+                                                            progressBar1.Maximum = match.Count;
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -266,6 +278,8 @@ namespace MovieSorter
 
         private void Move_button_Click(object sender, EventArgs e)
         {
+            var ignore = new List<string>();
+            var list = new List<string>();
             if (Source_dir.Text == "")
             {
                 errorProvider1.SetIconPadding(Move_button, -90);
@@ -292,21 +306,29 @@ namespace MovieSorter
                         if (attr != FileAttributes.Directory)
                         {
                             if (Directory.Exists(Path.GetDirectoryName(dest)))
-
-                                //FileSystem.CopyFile(source, dest, UIOption.AllDialogs);
+                            {
                                 FileSystem.MoveFile(source, dest, UIOption.AllDialogs);
+                                ignore.Add(item.SubItems[2].Text);
+                            }
 
 
                             else
                             {
                                 Directory.CreateDirectory(Path.GetDirectoryName(dest));
                                 FileSystem.MoveFile(source, dest, UIOption.AllDialogs);
+                                foreach (var file in Directory.GetFiles(Path.GetDirectoryName(source)))
+                                {
+                                    var extension = Path.GetExtension(file);
+                                    if(extension != null && extension.Equals(".srt")) FileSystem.MoveFile(file, Path.GetDirectoryName(dest) +"\\"+ Path.GetFileName(file), UIOption.AllDialogs);
+                                }
+                                if (Directory.GetFileSystemEntries(Path.GetDirectoryName(source)).Length == 0) Directory.Delete(Path.GetDirectoryName(source));
+                                ignore.Add(item.SubItems[2].Text);
                             }
                         }
                         else
                         {
                             FileSystem.MoveDirectory(source, dest, UIOption.AllDialogs);
-                            //DirectoryCopy(source, dest, true);
+                            ignore.Add(item.SubItems[2].Text);
                         }
                     }
                     catch (Exception ex)
@@ -314,6 +336,22 @@ namespace MovieSorter
                         MessageBox.Show(ex.Message);
                     }
                 }
+                var i = 1;
+                list.AddRange(from ListViewItem item in listView1.Items select item.SubItems[2].Text);
+                listView1.Items.Clear();
+                foreach (var ig in list)
+                {
+                    if (ignore.Contains(ig)) continue;
+                    var co = i++;
+                    Add("", co.ToString(), ig);
+                }
+                var num = list.Count - ignore.Count;
+                listView1.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
+                listView1.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
+                listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.ColumnContent);
+                listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.HeaderSize);
+                if (num > 1 || num == 0) Count.Text = num + @" Items in MatchList";
+                else Count.Text = num + @" Item in MatchList";
             }
         }
 
@@ -324,44 +362,6 @@ namespace MovieSorter
             if (!result) return;
             Distension_dir.Text = fs.FileName;
         }
-
-        //private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-        //{
-        //    // Get the subdirectories for the specified directory.
-        //    DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-        //    if (!dir.Exists)
-        //    {
-        //        throw new DirectoryNotFoundException(
-        //            "Source directory does not exist or could not be found: "
-        //            + sourceDirName);
-        //    }
-
-        //    DirectoryInfo[] dirs = dir.GetDirectories();
-        //    // If the destination directory doesn't exist, create it.
-        //    if (!Directory.Exists(destDirName))
-        //    {
-        //        Directory.CreateDirectory(destDirName);
-        //    }
-
-        //    // Get the files in the directory and copy them to the new location.
-        //    FileInfo[] files = dir.GetFiles();
-        //    foreach (FileInfo file in files)
-        //    {
-        //        string temppath = Path.Combine(destDirName, file.Name);
-        //        file.CopyTo(temppath, false);
-        //    }
-
-        //    // If copying subdirectories, copy them and their contents to new location.
-        //    if (copySubDirs)
-        //    {
-        //        foreach (var subdir in dirs)
-        //        {
-        //            string temppath = Path.Combine(destDirName, subdir.Name);
-        //            DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-        //        }
-        //    }
-        //}
 
         private void Check_All_CheckedChanged(object sender, EventArgs e)
         {
@@ -383,6 +383,7 @@ namespace MovieSorter
 
         private void Go_button_Click(object sender, EventArgs e)
         {
+            progressBar1.Value = 0;
             Query();
         }
 
