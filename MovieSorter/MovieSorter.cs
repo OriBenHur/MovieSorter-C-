@@ -308,6 +308,17 @@ namespace MovieSorter
                             if (Directory.Exists(Path.GetDirectoryName(dest)))
                             {
                                 FileSystem.MoveFile(source, dest, UIOption.AllDialogs);
+                                foreach (var file in Directory.GetFiles(Path.GetDirectoryName(source)))
+                                {
+                                    var extension = Path.GetExtension(file);
+                                    var fileNoExt = Path.GetFileNameWithoutExtension(file);
+                                    if(source.ToLower().Contains(fileNoExt.ToLower()))
+                                    {
+                                        var destfile = Path.GetDirectoryName(dest) + "\\" + Path.GetFileName(file);
+                                        if (extension != null && extension.Equals(".srt")) FileSystem.MoveFile(file, destfile, UIOption.AllDialogs);
+                                    }
+                                }
+
                                 ignore.Add(item.SubItems[2].Text);
                             }
 
