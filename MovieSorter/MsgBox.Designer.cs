@@ -52,13 +52,13 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(125, 69);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(81, 69);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // OK
             // 
             this.OK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.OK.Location = new System.Drawing.Point(25, 43);
+            this.OK.Location = new System.Drawing.Point(3, 43);
             this.OK.Name = "OK";
             this.OK.Size = new System.Drawing.Size(75, 23);
             this.OK.TabIndex = 0;
@@ -76,7 +76,7 @@
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(119, 23);
+            this.panel1.Size = new System.Drawing.Size(75, 23);
             this.panel1.TabIndex = 1;
             // 
             // label1
@@ -84,22 +84,22 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(10, 10);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(106, 13);
+            this.label1.Size = new System.Drawing.Size(0, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Pick the correct one:";
             // 
             // MsgBox
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(131, 76);
+            this.ClientSize = new System.Drawing.Size(87, 76);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MsgBox";
             this.Text = "MsgBox";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MsgBox_FormClosing);
             this.Load += new System.EventHandler(this.MsgBox_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

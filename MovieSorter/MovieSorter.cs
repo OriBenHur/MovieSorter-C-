@@ -59,11 +59,10 @@ namespace MovieSorter
 
         private void Query()
         {
-
             var filters =
                 new Regex(
                     @"(CAMRip|CAM|TS|TELESYNC|PDVD|PTVD|PPVRip|SCR|SCREENER|DVDSCR|DVDSCREENER|BDSCR|R4|R5|R5LINE|R5.LINE|DVD|DVD5|DVD9|DVDRip|DVDR|TVRip|DSR|PDTV|SDTV|HDTV|HDTVRip|DVB|DVBRip|DTHRip|VODRip|VODR|BDRip|BRRip|BR.Rip|BluRay|Blu.Ray|BD|BDR|BD25|BD50|3D.BluRay|3DBluRay|3DBD|Remux|BDRemux|BR.Scr|BR.Screener|HDDVD|HDRip|WorkPrint|VHS|VCD|TELECINE|WEBRip|WEB.Rip|WEBDL|WEB.DL|WEBCap|WEB.Cap|ithd|iTunesHD|Laserdisc|AmazonHD|NetflixHD|NetflixUHD|VHSRip|LaserRip|URip|UnknownRip|MicroHD|WP|TC|PPV|DDC|R5.AC3.5.1.HQ|DVD-Full|DVDFull|Full-Rip|FullRip|DSRip|SATRip|BD5|BD9|Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|(Ultimate.)?(Director.?s|Theatrical|Ultimate|Final|Rogue|Collectors|Special|Despecialized).(Cut|Edition|Version)|((H|HALF|F|FULL)[^\\p{Alnum}]{0,2})?(SBS|TAB|OU)|DivX|Xvid|AVC|(x|h)[.]?(264|265)|HEVC|3ivx|PGS|MP[E]?G[45]?|MP[34]|(FLAC|AAC|AC3|DD|MA).?[2457][.]?[01]|[26]ch|(Multi.)?DTS(.HD)?(.MA)?|FLAC|AAC|AC3|TrueHD|Atmos|[M0]?(420|480|720|1080|1440|2160)[pi]|(?<=[-.])(420|480|720|1080|2D|3D)|10.?bit|(24|30|60)FPS|Hi10[P]?|[a-z]{2,3}.(2[.]0|5[.]1)|(19|20)[0-9]+(.)S[0-9]+(?!(.)?E[0-9]+)|(?<=\\d+)v[0-4]|CD\\d+|3D|2D)");
-            var baseURL = "http://www.omdbapi.com/";
+            const string baseUrl = "http://www.omdbapi.com/";
             listView1.Items.Clear();
             var match = new List<string>();
             var ignore = new List<string>();
@@ -75,151 +74,144 @@ namespace MovieSorter
                 {
                     var potential = new List<dynamic>();
                     var dir = Path.GetDirectoryName(name);
-                    if (!(match.Contains(dir)) && !(ignore.Contains(dir)) && !(match.Contains(name)))
+                    if (match.Contains(dir) || ignore.Contains(dir) || match.Contains(name)) continue;
+                    var ext = Path.GetExtension(name);
+                    if (ext == null) continue;
+                    ext = ext.ToLower();
+                    if (!ext.Equals(".mp4") && !ext.Equals(".avi") && !ext.Equals(".mkv")) continue;
+                    var file = Path.GetFileNameWithoutExtension(name);
+                    var sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}");
+                    if (file != null && sp.IsMatch(file))
                     {
-                        var extension = Path.GetExtension(name);
-                        if (extension == null) continue;
-                        var ext = extension.ToLower();
-                        if (ext.Equals(".mp4") || ext.Equals(".avi") || ext.Equals(".mkv"))
+                        const string sPattern = "[sS][0-9]{2}";
+                        var s = Regex.Match(file, sPattern);
+                        var series = s.Value.ToLower();
+                        series = series.Replace("s", "");
+                        sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
+                        var ep = sp.Replace(file, string.Empty);
+                        var last = ep[ep.Length - 1];
+                        if (last.Equals('.')) ep = ep.Substring(0, ep.Length - 1);
+                        var uri = baseUrl + "?t=" + ep + "&Season=" + series + "&r=json";
+                        var request = WebRequest.Create(uri);
+                        request.Credentials = CredentialCache.DefaultCredentials;
+                        var response = request.GetResponse();
+                        // Get the stream containing content returned by the server.
+                        var dataStream = response.GetResponseStream();
+                        // Open the stream using a StreamReader for easy access.
+                        if (dataStream == null) continue;
+                        var reader = new StreamReader(dataStream);
+                        // Read the content.
+                        var responseFromServer = reader.ReadToEnd();
+                        // Display the content.
+                        dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
+                        var episodes = result.Episodes;
+                        // Clean up the streams and the response.
+                        reader.Close();
+                        response.Close();
+                        if (episodes == null)
                         {
-                            var file = Path.GetFileNameWithoutExtension(name);
-                            var sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}");
-                            if (file != null && sp.IsMatch(file))
+                            MessageBox.Show(file);
+                            continue;
+                        }
+                        if (TestYear(episodes))
+                        {
+                            match.Add(dir);
+                            progressBar1.Visible = true;
+                            progressBar1.Minimum = 0;
+                            progressBar1.Maximum = match.Count;
+                            progressBar1.Value = 0;
+                            progressBar1.Step = 1;
+                        }
+                        else ignore.Add(dir);
+                    }
+
+                    else
+                    {
+                        const string mPattern = "[0-9]{4}";
+                        var input = file;
+                        var m = Regex.Match(input, mPattern);
+                        var sDate = DateTime.Now.ToString(CultureInfo.CurrentCulture);
+                        var datevalue = Convert.ToDateTime(sDate);
+                        var year = !m.Success ? 0 : int.Parse(m.Value);
+                        if (year >= 1889 && year < datevalue.Year)
+                        {
+                            if (year == int.Parse(Year_TextBox.Text)) match.Add(name);
+                            progressBar1.Maximum = match.Count;
+
+                        }
+                        else
+                        {
+                            var tmp = file.Split('.');
+                            var tmpName = "";
+                            foreach (var item in tmp)
                             {
-                                const string sPattern = "[sS][0-9]{2}";
-                                var s = Regex.Match(file, sPattern);
-                                var series = s.Value.ToLower();
-                                series = series.Replace("s", "");
-                                sp = new Regex("[sS][0-9]{2}[eE][0-9]{2}.*");
-                                var ep = sp.Replace(file, string.Empty);
-                                var last = ep[ep.Length - 1];
-                                if (last.Equals('.')) ep = ep.Substring(0, ep.Length - 1);
-                                var uri = baseURL + "?t=" + ep + "&Season=" + series + "&r=json";
-                                var request = WebRequest.Create(uri);
-                                request.Credentials = CredentialCache.DefaultCredentials;
-                                var response = request.GetResponse();
-                                // Get the stream containing content returned by the server.
-                                var dataStream = response.GetResponseStream();
-                                // Open the stream using a StreamReader for easy access.
-                                if (dataStream != null)
-                                {
-                                    var reader = new StreamReader(dataStream);
-                                    // Read the content.
-                                    var responseFromServer = reader.ReadToEnd();
-                                    // Display the content.
-                                    dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
-                                    var episodes = result.Episodes;
-                                    // Clean up the streams and the response.
-                                    reader.Close();
-                                    response.Close();
-                                    if (episodes == null)
-                                    {
-                                        MessageBox.Show(file);
-                                        continue;
-                                    }
-                                    if (TestYear(episodes))
-                                    {
-                                        match.Add(dir);
-                                        progressBar1.Visible = true;
-                                        progressBar1.Minimum = 0;
-                                        progressBar1.Maximum = match.Count;
-                                        progressBar1.Value = 0;
-                                        progressBar1.Step = 1;
-                                    }
-                                    else ignore.Add(dir);
-                                }
+                                if (TestWord(item, filters)) tmpName += item + ".";
+                                else break;
                             }
-
-                            else
+                            tmpName = tmpName.Substring(0, tmpName.Length - 1);
+                            var uri = baseUrl + "?s=" + tmpName + "&type=movie&r=json";
+                            tmpName = tmpName.Replace(".", " ");
+                            var request = WebRequest.Create(uri);
+                            request.Credentials = CredentialCache.DefaultCredentials;
+                            var response = request.GetResponse();
+                            var dataStream = response.GetResponseStream();
+                            var reader = new StreamReader(dataStream);
+                            var responseFromServer = reader.ReadToEnd();
+                            dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
+                            string tmpResult = result.ToString();
+                            response.Close();
+                            dataStream.Close();
+                            reader.Close();
+                            if (result.Response == "False") continue;
                             {
+                                tmpResult = tmpResult.Replace("\r\n", string.Empty);
+                                var start = tmpResult.IndexOf("[", StringComparison.Ordinal);
+                                tmpResult = tmpResult.Substring(start, tmpResult.Length - start);
+                                var end = tmpResult.LastIndexOf("]", StringComparison.Ordinal) + 1;
+                                tmpResult = tmpResult.Substring(0, end);
+                                //tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
+                                result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
+                                foreach (var item in result)
                                 {
-                                    const string mPattern = "[0-9]{4}";
-                                    var input = file;
-                                    var m = Regex.Match(input, mPattern);
-                                    var year = !m.Success ? 0 : int.Parse(m.Value);
-                                    if (year >= 1889 && year < 2100)
+                                    if (item.Title.ToString().Equals(tmpName) &&
+                                        item.Type.ToString().Equals("movie")) potential.Add(item);
+                                }
+                                if (potential.Count == 1)
+                                {
+                                    if (potential[0].Year.ToString() == Year_TextBox.Text)
                                     {
-                                        if (year == int.Parse(Year_TextBox.Text)) match.Add(name);
+                                        match.Add(name);
+                                        progressBar1.Maximum = match.Count;
                                     }
-                                    else
+
+                                }
+
+                                else if (potential.Count != 0)
+                                {
+                                    var msg = new MsgBox();
+                                    const string imdburl = "http://www.imdb.com/title/";
+                                    const int x = 25;
+                                    var y = 30;
+                                    foreach (var potentialItem in potential)
                                     {
-                                        var tmp = file.Split('.');
-                                        var tmpName = "";
-                                        foreach (var item in tmp)
-                                        {
-                                            if (TestWord(item, filters)) tmpName += item + ".";
-                                            else break;
-                                        }
-                                        tmpName = tmpName.Substring(0, tmpName.Length - 1);
-                                        var uri = baseURL + "?s=" + tmpName + "&type=movie&r=json";
-                                        tmpName = tmpName.Replace(".", " ");
-                                        var request = WebRequest.Create(uri);
-                                        request.Credentials = CredentialCache.DefaultCredentials;
-                                        var response = request.GetResponse();
-                                        var dataStream = response.GetResponseStream();
-                                        var reader = new StreamReader(dataStream);
-                                        var responseFromServer = reader.ReadToEnd();
-                                        dynamic result = JsonConvert.DeserializeObject<dynamic>(responseFromServer);
-                                        string tmpResult = result.ToString();
-                                        response.Close();
-                                        dataStream.Close();
-                                        reader.Close();
-                                        if (result.Response != "False")
-                                        {
-                                            tmpResult = tmpResult.Replace("\r\n", string.Empty);
-                                            var start = tmpResult.IndexOf("[", StringComparison.Ordinal);
-                                            tmpResult = tmpResult.Substring(start, tmpResult.Length - start);
-                                            var end = tmpResult.LastIndexOf("]", StringComparison.Ordinal) + 1;
-                                            tmpResult = tmpResult.Substring(0, end);
-                                            //tmpResult = tmpResult.Remove(tmpResult.Trim().Length - 1);
-                                            result = JsonConvert.DeserializeObject<dynamic>(tmpResult);
-                                            foreach (var item in result)
-                                            {
-                                                if (item.Title.ToString().Equals(tmpName) &&
-                                                    item.Type.ToString().Equals("movie")) potential.Add(item);
-                                            }
-                                            if (potential.Count == 1)
-                                            {
-                                                if (potential[0].Year.ToString() == Year_TextBox.Text)
-                                                {
-                                                    match.Add(name);
-                                                    progressBar1.Maximum = match.Count;
-                                                }
 
-                                            }
-
-                                            else if (potential.Count != 0)
-                                            {
-                                                var msg = new MsgBox();
-                                                const string imdburl = "http://www.imdb.com/title/";
-                                                const int x = 25;
-                                                var y = 30;
-                                                foreach (var potentialItem in potential)
-                                                {
-
-                                                    //imdbID = imdburl + potentialItem.imdbID.ToString();
-                                                    msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), x, y);
-                                                    y += 20;
-                                                }
-                                                msg.MyTitle = tmpName + " Conflicts";
-                                                msg.ShowDialog();
-                                                foreach (var selected in potential)
-                                                {
-                                                    if (selected.imdbID.ToString().Equals(msg.MyID))
-                                                    {
-                                                        if (selected.Year.ToString() == Year_TextBox.Text)
-                                                        {
-                                                            match.Add(name);
-                                                            progressBar1.Maximum = match.Count;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        //imdbID = imdburl + potentialItem.imdbID.ToString();
+                                        msg.AddLabeles(imdburl + potentialItem.imdbID.ToString(), potentialItem.Title.ToString() + " (" + potentialItem.Year.ToString() + ")", x, y);
+                                        y += 20;
+                                    }
+                                    msg.MyTitle = tmpName;
+                                    msg.ShowDialog();
+                                    foreach (var selected in potential)
+                                    {
+                                        if (!selected.imdbID.ToString().Equals(msg.MyId)) continue;
+                                        if (!selected.Year.ToString().Equals(Year_TextBox.Text)) continue;
+                                        match.Add(name);
+                                        progressBar1.Maximum = match.Count;
                                     }
                                 }
                             }
                         }
+
                     }
                 }
 
@@ -233,7 +225,8 @@ namespace MovieSorter
                 listView1.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 listView1.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
                 listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.ColumnContent);
-                listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.HeaderSize);
+                if (listView1.Items.Count == 0)
+                    listView1.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.HeaderSize);
                 Counter(match);
             }
 
@@ -241,10 +234,9 @@ namespace MovieSorter
 
         }
 
-        private bool TestWord(string arg, Regex filters)
+        private static bool TestWord(string arg, Regex filters)
         {
-            if (filters.IsMatch(arg)) return false;
-            return true;
+            return !filters.IsMatch(arg);
         }
 
         private bool TestYear(dynamic episodes)
@@ -312,11 +304,9 @@ namespace MovieSorter
                                 {
                                     var extension = Path.GetExtension(file);
                                     var fileNoExt = Path.GetFileNameWithoutExtension(file);
-                                    if(source.ToLower().Contains(fileNoExt.ToLower()))
-                                    {
-                                        var destfile = Path.GetDirectoryName(dest) + "\\" + Path.GetFileName(file);
-                                        if (extension != null && extension.Equals(".srt")) FileSystem.MoveFile(file, destfile, UIOption.AllDialogs);
-                                    }
+                                    if (!source.ToLower().Contains(fileNoExt.ToLower())) continue;
+                                    var destfile = Path.GetDirectoryName(dest) + "\\" + Path.GetFileName(file);
+                                    if (extension != null && extension.Equals(".srt")) FileSystem.MoveFile(file, destfile, UIOption.AllDialogs);
                                 }
 
                                 ignore.Add(item.SubItems[2].Text);
@@ -330,7 +320,9 @@ namespace MovieSorter
                                 foreach (var file in Directory.GetFiles(Path.GetDirectoryName(source)))
                                 {
                                     var extension = Path.GetExtension(file);
-                                    if(extension != null && extension.Equals(".srt")) FileSystem.MoveFile(file, Path.GetDirectoryName(dest) +"\\"+ Path.GetFileName(file), UIOption.AllDialogs);
+                                    var destFile = Path.GetDirectoryName(dest) + "\\" + Path.GetFileName(file);
+                                    if (extension == null || !extension.Equals(".srt")) continue;
+                                    FileSystem.MoveFile(file, destFile, UIOption.AllDialogs);
                                 }
                                 if (Directory.GetFileSystemEntries(Path.GetDirectoryName(source)).Length == 0) Directory.Delete(Path.GetDirectoryName(source));
                                 ignore.Add(item.SubItems[2].Text);

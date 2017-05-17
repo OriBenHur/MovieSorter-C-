@@ -12,68 +12,69 @@ namespace MovieSorter
             InitializeComponent();
         }
 
-        public string _ID;
+        private string _id;
 
-        public string MyID
+        public string MyId
         {
-            get { return _ID; }
-            set { _ID = value; }
+            get { return _id; }
+            set { _id = value; }
         }
 
-        public string _Title;
+        private string _title;
 
         public string MyTitle
         {
-            get { return _Title; }
-            set { _Title = value; }
+            get { return _title; }
+            set { _title = value; }
         }
-        public void AddLabeles(string lable, int x, int y)
+        public void AddLabeles(string link, string lable, int x, int y)
         {
-            LinkLabel _tmpLable = new LinkLabel();
-            RadioButton _checkBox = new RadioButton();
+            var tmpLable = new LinkLabel();
+            var checkBox = new RadioButton();
             var location = new Point(x, y);
             var checkBoxLocation = new Point(x - 15, y - 5);
-            _checkBox.Location = checkBoxLocation;
-            _tmpLable.Text = lable;
-            _tmpLable.AutoSize = true;
-            _tmpLable.Location = location;
-            var ID = lable.Split('/');
-            _checkBox.Name = ID[ID.Length - 1];
-            panel1.Controls.Add(_tmpLable);
-            panel1.Controls.Add(_checkBox);
-            _tmpLable.Click += link_Click;
-            //_checkBox.Click += new EventHandler(GetCheckedRadio);
+            checkBox.Location = checkBoxLocation;
+            tmpLable.Text = lable;
+            tmpLable.Links.Add(0, link.Length, link);
+            tmpLable.AutoSize = true;
+            tmpLable.Location = location;
+            var id = link.Split('/');
+            checkBox.Name = id[id.Length - 1];
+            panel1.Controls.Add(tmpLable);
+            panel1.Controls.Add(checkBox);
+            tmpLable.Click += link_Click;
 
 
         }
 
-        protected void link_Click(object sender, EventArgs e)
+        private void link_Click(object sender, EventArgs e)
         {
             var link = (LinkLabel)sender;
-            Process.Start(link.Text);
+            Process.Start(link.Links[0].LinkData.ToString());
         }
 
+        private static bool _isOk;
         private void OK_Click(object sender, EventArgs e)
         {
             var item = GetCheckedRadio(panel1);
             if (item != null)
             {
-                if (item.Checked)
-                {
-                    MyID = item.Name;
-                    Dispose();
-                }
+                if (!item.Checked) return;
+                MyId = item.Name;
+                _isOk = true;
+                Dispose();
             }
             else
-
-                MessageBox.Show("You Must Pick One Item");
+                MessageBox.Show(@"You Must Pick One Item");
 
         }
 
 
         private void MsgBox_Load(object sender, EventArgs e)
         {
-            this.Text = _Title;
+            Text = $@"{_title} Conflicts";
+            label1.Text = $@"Witch {_title} is the correct one?";
+
         }
 
         private RadioButton GetCheckedRadio(Control container)
@@ -89,6 +90,30 @@ namespace MovieSorter
             }
 
             return null;
+        }
+
+        private void MsgBox_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (CloseCancel() == false)
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private static bool CloseCancel()
+        {
+            if (!_isOk)
+            {
+                const string message = "Are you sure that you would like to exit?";
+                const string caption = "Exit";
+                var result = MessageBox.Show(message, caption,
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+                return result == DialogResult.Yes;
+            }
+            _isOk = false;
+            return true;
+
         }
     }
 }
